@@ -1,0 +1,228 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: recipe_postgres
+    environment:
+      POSTGRES_DB: recipe_management_dev
+      POSTGRES_USER: recipe_user
+      POSTGRES_PASSWORD: recipe_password
+      POSTGRES_MULTIPLE_DATABASES: product_service,recipe_service,calculator_service
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - recipe_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recipe_user -d recipe_management_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: recipe_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - recipe_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Product Service
+  product-service:
+    build:
+      context: ./services/product-service
+      dockerfile: Dockerfile
+    container_name: recipe_product_service
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=recipe_management_dev
+      - DATABASE_USER=recipe_user
+      - DATABASE_PASSWORD=recipe_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./services/product-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - recipe_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Recipe Service
+  recipe-service:
+    build:
+      context: ./services/recipe-service
+      dockerfile: Dockerfile
+    container_name: recipe_recipe_service
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=recipe_management_dev
+      - DATABASE_USER=recipe_user
+      - DATABASE_PASSWORD=recipe_password
+      - PRODUCT_SERVICE_URL=http://product-service:8001
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./services/recipe-service:/app
+    depends_on:
+      product-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - recipe_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Calculator Service
+  calculator-service:
+    build:
+      context: ./services/calculator-service
+      dockerfile: Dockerfile
+    container_name: recipe_calculator_service
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=recipe_management_dev
+      - DATABASE_USER=recipe_user
+      - DATABASE_PASSWORD=recipe_password
+      - RECIPE_SERVICE_URL=http://recipe-service:8002
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./services/calculator-service:/app
+    depends_on:
+      recipe-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - recipe_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: recipe_api_gateway
+    environment:
+      - PRODUCT_SERVICE_URL=http://product-service:8001
+      - RECIPE_SERVICE_URL=http://recipe-service:8002
+      - CALCULATOR_SERVICE_URL=http://calculator-service:8003
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - CORS_ORIGINS=http://localhost:3000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/api-gateway:/app
+    depends_on:
+      product-service:
+        condition: service_healthy
+      recipe-service:
+        condition: service_healthy
+      calculator-service:
+        condition: service_healthy
+    networks:
+      - recipe_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: recipe_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api-gateway
+    networks:
+      - recipe_network
+    restart: unless-stopped
+
+  # Frontend Development Server (optional, for development)
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: recipe_frontend_dev
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api-gateway
+    networks:
+      - recipe_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  recipe_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
