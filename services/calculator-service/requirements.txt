@@ -1,0 +1,38 @@
+# Flask Core (lightweight setup)
+Flask==2.3.3
+Flask-RESTful==0.3.10
+Flask-CORS==4.0.0
+
+# API Documentation (minimal)
+flask-smorest==0.42.3
+marshmallow==3.20.1
+
+# HTTP Client for service communication
+requests==2.31.0
+httpx==0.25.0
+
+# Caching
+redis==4.6.0
+Flask-Caching==2.1.0
+
+# Validation & Serialization
+webargs==8.3.0
+
+# Development & Testing
+pytest==7.4.2
+pytest-flask==1.2.0
+pytest-cov==4.1.0
+responses==0.23.3
+
+# Code Quality (minimal)
+black==23.7.0
+flake8==6.0.0
+
+# Utilities
+python-dotenv==1.0.0
+click==8.1.7
+Werkzeug==2.3.7
+gunicorn==21.2.0
+
+# Monitoring & Logging (lightweight)
+structlog==23.1.0

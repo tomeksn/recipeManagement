@@ -1,0 +1,102 @@
+version: 2
+updates:
+  # Enable version updates for Python dependencies in each service
+  - package-ecosystem: "pip"
+    directory: "/services/product-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "tomeksn"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps(product-service):"
+      
+  - package-ecosystem: "pip"
+    directory: "/services/recipe-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "tomeksn"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps(recipe-service):"
+      
+  - package-ecosystem: "pip"
+    directory: "/services/calculator-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "tomeksn"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps(calculator-service):"
+      
+  - package-ecosystem: "pip"
+    directory: "/services/api-gateway"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "tomeksn"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps(api-gateway):"
+      
+  # Enable version updates for npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "tomeksn"
+    labels:
+      - "dependencies"
+      - "javascript"
+    commit-message:
+      prefix: "deps(frontend):"
+      
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "tomeksn"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "deps(docker):"
+      
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "tomeksn"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "deps(actions):"

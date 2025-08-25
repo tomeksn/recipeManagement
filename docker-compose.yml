@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: recipe_password
       POSTGRES_MULTIPLE_DATABASES: product_service,recipe_service,calculator_service
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init-scripts:/docker-entrypoint-initdb.d
@@ -23,7 +23,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis for caching
+  # Redis for caching and sessions
   redis:
     image: redis:7-alpine
     container_name: recipe_redis
@@ -157,7 +157,7 @@ services:
       - REDIS_PORT=6379
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - CORS_ORIGINS=http://localhost:3000
+      - CORS_ORIGINS=http://localhost:3000,http://172.27.214.48:3000,http://192.168.0.115:3000
     ports:
       - "8000:8000"
     volumes:
@@ -166,8 +166,6 @@ services:
       product-service:
         condition: service_healthy
       recipe-service:
-        condition: service_healthy
-      calculator-service:
         condition: service_healthy
     networks:
       - recipe_network
@@ -201,7 +199,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: recipe_frontend_dev
     environment:
-      - REACT_APP_API_URL=http://localhost:8000
+      - VITE_API_URL=http://192.168.0.115:8000/api/v1
       - CHOKIDAR_USEPOLLING=true
     ports:
       - "3000:3000"

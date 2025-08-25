@@ -1,0 +1,1 @@
+"""Data models for the Recipe Service."""
