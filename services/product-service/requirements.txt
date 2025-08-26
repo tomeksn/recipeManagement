@@ -32,7 +32,7 @@ faker==19.6.2
 # Code Quality
 black==23.7.0
 flake8==6.0.0
-mypy==1.6.1
+mypy==1.17.1
 pre-commit==3.4.0
 
 # Utilities
