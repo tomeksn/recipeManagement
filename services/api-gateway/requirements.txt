@@ -9,7 +9,7 @@ marshmallow==3.20.1
 
 # HTTP Client for service communication
 requests==2.31.0
-httpx==0.25.0
+httpx==0.28.1
 
 # Rate Limiting & Security
 Flask-Limiter==3.5.0
