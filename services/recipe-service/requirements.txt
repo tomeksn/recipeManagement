@@ -16,7 +16,7 @@ SQLAlchemy==2.0.21
 
 # Caching & Performance
 Flask-Caching==2.1.0
-redis==4.6.0
+redis==6.4.0
 
 # HTTP Client for service communication
 requests==2.31.0
