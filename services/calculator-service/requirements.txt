@@ -16,7 +16,7 @@ redis==4.6.0
 Flask-Caching==2.1.0
 
 # Validation & Serialization
-webargs==8.3.0
+webargs==8.7.0
 
 # Development & Testing
 pytest==7.4.2
