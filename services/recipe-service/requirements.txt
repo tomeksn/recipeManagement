@@ -41,7 +41,7 @@ mypy==1.6.1
 pre-commit==3.4.0
 
 # Utilities
-python-dotenv==1.0.0
+python-dotenv==1.1.1
 click==8.1.7
 Werkzeug==2.3.7
 gunicorn==21.2.0
