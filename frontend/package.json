@@ -57,7 +57,7 @@
     "vitest": "^0.34.1",
     "@vitest/ui": "^0.34.1",
     "jsdom": "^22.1.0",
-    "@testing-library/react": "^13.4.0",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/user-event": "^14.4.3",
     "msw": "^1.2.3"
